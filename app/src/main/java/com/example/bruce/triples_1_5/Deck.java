@@ -27,7 +27,7 @@ public class Deck {
         return mShuffledDeck;
     }
 
-    public int getNumCardsInDeck(){
+    public int getNumOfCardsInDeck(){
         return mShuffledDeck.size() - 1;
     }
 

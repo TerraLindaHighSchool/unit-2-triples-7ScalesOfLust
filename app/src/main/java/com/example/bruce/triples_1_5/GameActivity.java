@@ -1,5 +1,6 @@
 package com.example.bruce.triples_1_5;
 
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -52,16 +53,16 @@ public class GameActivity extends AppCompatActivity {
         mTextScore = findViewById(R.id.TextView_Score);
         mTextHighScore = findViewById(R.id.TextView_High_Score);
         mButtonQuit = findViewById(R.id.Button_Quit);
-        //setImageArray();
-        //setAnimationsAndListener();
-        //game = new GameModel(numCardsInDeck, level);
-        //beginGame(numCardsOnBoard);
-        //beginRound(numCardsOnBoard);
+        setImageViewArray();
+        setAnimationsAndListener();
+        game = new GameModel(numCardsInDeck, level);
+        beginGame(numCardsOnBoard);
+        listenForUI(numCardsOnBoard);
     }
-/*
+
     /*************************************************
-     * Begin Game deals cards onto board
-     ************************************************* /
+     * Begin Game and deals cards onto board
+     *************************************************/
     private void beginGame(int numCardsOnBoard){
         mButtonQuit.setText(R.string.quit);
         updateAndDeclareScores(true);
@@ -69,59 +70,86 @@ public class GameActivity extends AppCompatActivity {
         for(int i = numCardsOnBoard; i < MAX_IMAGES; i++)
             mImageArray[i].setVisibility(View.GONE);
         for(int imageIndex = 0; imageIndex < numCardsOnBoard; imageIndex++){
-            mImageArray[imageIndex].setImageResource(game.dealTopCard(-1).getImageID());
+            game.addCardToBoard();
+            mImageArray[imageIndex].setImageResource(game.getCardOnBoard(imageIndex).getImageID());
         }
         if(!game.playIsPossible()) gameOver();
         updateCardsRemaining();
     }
 
     /*************************************************
-     * Begin Round listens for user card selection
-     ************************************************* /
-    protected void beginRound(int numCardsOnBoard) {
+     * Begin Round Listeners
+     *************************************************/
+    protected void listenForUI(int numCardsOnBoard) {
         for (int imageIndex = 0; imageIndex < numCardsOnBoard; imageIndex++) {
             final int index = imageIndex;
             mImageArray[imageIndex].setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Card cardSelected = game.getCardOnBoard(index);
-        // Card already selected, so this unselects it ******************
+                    // Card already selected, so this unselects it ******************
                     if (cardSelected.getIsSelected()) {
                         mImageArray[index].setImageResource(cardSelected.getImageID());
                         cardSelected.setIsSelected(false);
-                        game.listSelectedCards(false, index);
-        // Card being selected  *******************************************
+                        game.removeSelectedCardIndex(index);
+                        // Card being selected  *******************************************
                     } else {
                         mImageArray[index].setImageResource(cardSelected.getSelectedImageID());
                         cardSelected.setIsSelected(true);
-                        game.listSelectedCards(true, index);
+                        game.addSelectedCardIndex(index);
                     }
-        // Checks to see if 3 cards have been selected **************************
+                    // Checks to see if 3 cards have been selected **************************
                     if (game.getNumOfCardsSelected() == 3)
                         endRound();
                 }
             });
-        mButtonQuit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), MainActivity.class);
-                startActivity(intent);
+            mButtonQuit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(v.getContext(), MainActivity.class);
+                    startActivity(intent);
+                }
+            });
+        }
+    }
+
+    private void setAnimationsAndListener(){
+        wobble = AnimationUtils.loadAnimation(getApplicationContext(),
+                R.anim.wobble);
+        slideDown = AnimationUtils.loadAnimation(getApplicationContext(),
+                R.anim.slide_down);
+        slideDown.setAnimationListener(new Animation.AnimationListener() {
+            public void onAnimationStart(Animation anim)
+            {
+            }
+            public void onAnimationRepeat(Animation anim)
+            {
+            }
+            public void onAnimationEnd(Animation anim)
+            {
+                int index;
+                for(int i = 3; i > 0; i--){
+                    index = game.getSelectedCardIndex(i - 1);
+                    mImageArray[index].setImageResource(game.getCardOnBoard(index).getImageID());
+                    game.setStartTime();
+                }
+                game.resetSelectedCardIndices();
+                if(!game.playIsPossible()) gameOver();
             }
         });
-        }
     }
 
     /*************************************************
      * If triple, begins next round
-     ************************************************* /
+     *************************************************/
     private void endRound(){
         int index;
         if (game.isTriple(game.getSelectedCardIndex(0), game.getSelectedCardIndex(1),
-                          game.getSelectedCardIndex(2))) {
+                game.getSelectedCardIndex(2))) {
             for(int i = 3; i > 0; i--){
                 index = game.getSelectedCardIndex(i - 1);
                 if(game.getNumOfCardsInDeck() == 0) mImageArray[index].setVisibility(View.GONE);
-                game.dealTopCard(index);
+                game.replaceCardOnBoard(index);
             }
             for(int i = 3; i > 0; i--){
                 index = game.getSelectedCardIndex(i - 1);
@@ -136,14 +164,22 @@ public class GameActivity extends AppCompatActivity {
                 index = game.getSelectedCardIndex(i - 1);
                 mImageArray[index].startAnimation(wobble);
                 mImageArray[index].setImageResource(game.getCardOnBoard(index).getImageID());
-                game.removeSelectedCard(i - 1);
             }
+            game.resetSelectedCardIndices();
         }
     }
 
     /*************************************************
-     * Misc Concrete Methods
-     ************************************************* /
+     * Displays end game messages
+     *************************************************/
+    private void gameOver(){
+        String message = game.getGameOverMessage(getApplicationContext());
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
+
+    /*************************************************
+     * Game Updates
+     *************************************************/
 
     protected void updateAndDeclareScores(boolean isBegin) {
         SharedPreferences prefs = getSharedPreferences("Triples", MODE_PRIVATE);
@@ -167,7 +203,11 @@ public class GameActivity extends AppCompatActivity {
         mTextCardsRemaining.setText(cardsRemaining);
     }
 
-    private void setImageArray(){
+    /*************************************************
+     * Sets ImageView ID to Array of ImageViews
+     *************************************************/
+
+    private void setImageViewArray(){
         mImageArray[0] = findViewById(R.id.imageView_0_0);
         mImageArray[1] = findViewById(R.id.imageView_0_1);
         mImageArray[2] = findViewById(R.id.imageView_0_2);
@@ -187,37 +227,4 @@ public class GameActivity extends AppCompatActivity {
         mImageArray[16] = findViewById(R.id.imageView_5_1);
         mImageArray[17] = findViewById(R.id.imageView_5_2);
     }
-
-    private void setAnimationsAndListener(){
-        wobble = AnimationUtils.loadAnimation(getApplicationContext(),
-                R.anim.wobble);
-        slideDown = AnimationUtils.loadAnimation(getApplicationContext(),
-                R.anim.slide_down);
-        slideDown.setAnimationListener(new Animation.AnimationListener() {
-            public void onAnimationStart(Animation anim)
-            {
-            }
-            public void onAnimationRepeat(Animation anim)
-            {
-            }
-            public void onAnimationEnd(Animation anim)
-            {
-                int index;
-                for(int i = 3; i > 0; i--){
-                    index = game.getSelectedCardIndex(i - 1);
-                    mImageArray[index].setImageResource(game.getCardOnBoard(index).getImageID());
-                    game.removeSelectedCard(i - 1);
-                    game.setStartTime();
-                }
-                if(!game.playIsPossible()) gameOver();
-            }
-        });
-    }
-
-    private void gameOver(){
-        String message = game.getGameOverMessage(getApplicationContext());
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-
-    }
-*/
 }

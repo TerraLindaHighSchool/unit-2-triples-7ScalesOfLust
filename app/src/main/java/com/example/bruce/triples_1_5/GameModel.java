@@ -8,11 +8,12 @@ public class GameModel {
     private ArrayList<Card> mCardOnBoard;
     private ArrayList<Integer> mSelectedCards;
     private long mStartTime;
-    private int mScore, mTriplesRemaining, mLevel;
+    private int mScore, mTriplesRemaining, mLevel, mNumOfCardsInDeck;
 
     GameModel(int numOfCardsInDeck, int level){
         deck = new Deck(numOfCardsInDeck);
         mLevel = level;
+        mNumOfCardsInDeck = numOfCardsInDeck;
     }
 
 /*************************************************
@@ -37,6 +38,10 @@ public class GameModel {
 
         public void setTriplesRemaining(){
             mTriplesRemaining --;
+        }
+
+        public int getNumOfCardsInDeck(){
+            return mNumOfCardsInDeck;
         }
 
     /*************************************************
