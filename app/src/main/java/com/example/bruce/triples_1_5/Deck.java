@@ -1,5 +1,7 @@
 package com.example.bruce.triples_1_5;
 
+import java.util.ArrayList;
+
 public class Deck {
     private Card[] mOrderedDeck;
     private ArrayList<Card> mShuffledDeck;
@@ -8,6 +10,33 @@ public class Deck {
         mOrderedDeck = new Card[numOfCardsInDeck + 1];
         populateOrderedDeckWithCards(numOfCardsInDeck);
         createShuffledDeck();
+    }
+
+    private ArrayList createShuffledDeck(){
+        mShuffledDeck = new ArrayList<Card>();
+
+        for(int i = 0; i < mOrderedDeck.length; i++) {
+            mShuffledDeck.add(mOrderedDeck[i]);
+        }
+
+        for(int i = 0; i < mShuffledDeck.size(); i++){
+            mShuffledDeck.add((int)(Math.random()*mShuffledDeck.size()), mOrderedDeck[i]);
+            mShuffledDeck.remove(mOrderedDeck[i]);
+        }
+
+        return mShuffledDeck;
+    }
+
+    public int getNumCardsInDeck(){
+        return mShuffledDeck.size() - 1;
+    }
+
+    public Card getTopCard(){
+        return (mShuffledDeck.size() > 0) ? mShuffledDeck.remove(0) : mOrderedDeck[0];
+    }
+
+    public Card getCard(int index){
+        return mShuffledDeck.get(index);
     }
 
     private void populateOrderedDeckWithCards(int numOfCardsInDeck){
