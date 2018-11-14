@@ -8,12 +8,16 @@ public class GameModel {
     private ArrayList<Card> mCardOnBoard;
     private ArrayList<Integer> mSelectedCards;
     private long mStartTime;
+
     private int mScore, mTriplesRemaining, mLevel, mNumOfCardsInDeck;
 
     GameModel(int numOfCardsInDeck, int level){
         deck = new Deck(numOfCardsInDeck);
-        mLevel = level;
         mNumOfCardsInDeck = numOfCardsInDeck;
+        mLevel = level;
+        mCardOnBoard = new ArrayList<>();
+        mSelectedCards = new ArrayList<>();
+        mStartTime = System.currentTimeMillis();
     }
 
 /*************************************************
@@ -44,15 +48,26 @@ public class GameModel {
             return mNumOfCardsInDeck;
         }
 
+        public int getLevel(){
+            return mLevel;
+        }
+
+        public int getScore() {
+            return mScore;
+        }
+
+        public void setScore(int score) {
+            mScore = score;
+        }
     /*************************************************
      * Methods that place cards to board
      *************************************************/
     protected void addCardToBoard(){
-        mCardOnBoard.add(0, deck.getTopCard());
+        mCardOnBoard.add(deck.getTopCard());
     }
 
     protected void replaceCardOnBoard(int index){
-        // to be implemented
+        mCardOnBoard.set(index, deck.getTopCard());
     }
 
     /*************************************************
@@ -60,15 +75,17 @@ public class GameModel {
      *************************************************/
 
     protected void addSelectedCardIndex(int cardIndex){
-        // to be implemented
+        mSelectedCards.add(cardIndex);
     }
 
     protected void removeSelectedCardIndex(int cardIndex){
-        // to be implemented
+        mSelectedCards.remove(cardIndex);
     }
 
     protected void resetSelectedCardIndices(){
-        // to be implemented
+        mSelectedCards.remove(0);
+        mSelectedCards.remove(1);
+        mSelectedCards.remove(2);
     }
 
     /*************************************************
@@ -84,8 +101,16 @@ public class GameModel {
      *************************************************/
 
     protected boolean isTriple(int firstCard, int secondCard, int thirdCard){
-        // to be implemented
-        return true; // temporary placeholder until implementation
+        boolean shapeIsSame, colorIsSame, numberIsSame;
+
+        shapeIsSame = ((mCardOnBoard.get(firstCard).getShape().ordinal() + mCardOnBoard.get(secondCard).getShape().ordinal() + mCardOnBoard.get(thirdCard).getShape().ordinal()) % 3 == 0) ? true : false;
+
+        colorIsSame = ((mCardOnBoard.get(firstCard).getColor().ordinal() + mCardOnBoard.get(secondCard).getColor().ordinal() + mCardOnBoard.get(thirdCard).getColor().ordinal()) % 3 == 0) ? true : false;
+
+        numberIsSame = ((mCardOnBoard.get(firstCard).getNumber() + mCardOnBoard.get(secondCard).getNumber() + mCardOnBoard.get(thirdCard).getNumber()) % 3 == 0) ? true : false;
+
+
+        return (shapeIsSame == colorIsSame && colorIsSame == numberIsSame) ? true : false;
     }
 
     protected boolean playIsPossible(){

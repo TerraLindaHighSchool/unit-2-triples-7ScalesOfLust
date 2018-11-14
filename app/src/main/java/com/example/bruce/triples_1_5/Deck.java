@@ -7,28 +7,30 @@ public class Deck {
     private ArrayList<Card> mShuffledDeck;
 
     Deck(int numOfCardsInDeck){
+        mShuffledDeck = new ArrayList<>();
         mOrderedDeck = new Card[numOfCardsInDeck + 1];
         populateOrderedDeckWithCards(numOfCardsInDeck);
         createShuffledDeck();
     }
 
     private ArrayList createShuffledDeck(){
-        mShuffledDeck = new ArrayList<Card>();
 
-        for(int i = 0; i < mOrderedDeck.length; i++) {
+        for(int i = 1; i < mOrderedDeck.length; i++){
             mShuffledDeck.add(mOrderedDeck[i]);
         }
 
         for(int i = 0; i < mShuffledDeck.size(); i++){
-            mShuffledDeck.add((int)(Math.random()*mShuffledDeck.size()), mOrderedDeck[i]);
-            mShuffledDeck.remove(mOrderedDeck[i]);
+            int random = (int)(Math.random()*mShuffledDeck.size());
+            Card temp = mShuffledDeck.get(i);
+            mShuffledDeck.set(i, temp);
+            mShuffledDeck.set(random, temp);
         }
 
         return mShuffledDeck;
     }
 
     public int getNumOfCardsInDeck(){
-        return mShuffledDeck.size() - 1;
+        return mShuffledDeck.size();
     }
 
     public Card getTopCard(){
