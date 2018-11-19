@@ -79,21 +79,23 @@ public class GameModel {
     }
 
     protected void removeSelectedCardIndex(int cardIndex){
-        mSelectedCards.remove(cardIndex);
+        mSelectedCards.remove(new Integer(cardIndex));
     }
 
     protected void resetSelectedCardIndices(){
-        mSelectedCards.remove(0);
-        mSelectedCards.remove(1);
-        mSelectedCards.remove(2);
+        int length = mSelectedCards.size();
+        for(int i = length; i > 0; i--){
+            mSelectedCards.remove(i - 1);
+        }
     }
 
     /*************************************************
      * Scoring
      *************************************************/
     protected int updateScore() {
-        // to be implemented
-        return -1; // temporary placeholder until implementation
+        long time = (mStartTime - System.currentTimeMillis());
+        setScore(getScore() + ((int)time / 100));;
+        return mScore;
     }
 
     /*************************************************
@@ -101,21 +103,35 @@ public class GameModel {
      *************************************************/
 
     protected boolean isTriple(int firstCard, int secondCard, int thirdCard){
-        boolean shapeIsSame, colorIsSame, numberIsSame;
+        int shapeIsSame, colorIsSame, numberIsSame, alphaIsSame, isSame;
 
-        shapeIsSame = ((mCardOnBoard.get(firstCard).getShape().ordinal() + mCardOnBoard.get(secondCard).getShape().ordinal() + mCardOnBoard.get(thirdCard).getShape().ordinal()) % 3 == 0) ? true : false;
+        shapeIsSame = (mCardOnBoard.get(firstCard).getShape().ordinal() + mCardOnBoard.get(secondCard).getShape().ordinal() + mCardOnBoard.get(thirdCard).getShape().ordinal()) % 3;
 
-        colorIsSame = ((mCardOnBoard.get(firstCard).getColor().ordinal() + mCardOnBoard.get(secondCard).getColor().ordinal() + mCardOnBoard.get(thirdCard).getColor().ordinal()) % 3 == 0) ? true : false;
+        colorIsSame = (mCardOnBoard.get(firstCard).getColor().ordinal() + mCardOnBoard.get(secondCard).getColor().ordinal() + mCardOnBoard.get(thirdCard).getColor().ordinal()) % 3;
 
-        numberIsSame = ((mCardOnBoard.get(firstCard).getNumber() + mCardOnBoard.get(secondCard).getNumber() + mCardOnBoard.get(thirdCard).getNumber()) % 3 == 0) ? true : false;
+        numberIsSame = (mCardOnBoard.get(firstCard).getNumber() + mCardOnBoard.get(secondCard).getNumber() + mCardOnBoard.get(thirdCard).getNumber()) % 3;
 
+        alphaIsSame = (mCardOnBoard.get(firstCard).getAlpha() + mCardOnBoard.get(secondCard).getAlpha() + mCardOnBoard.get(thirdCard).getAlpha()) % 3;
 
-        return (shapeIsSame == colorIsSame && colorIsSame == numberIsSame) ? true : false;
+        isSame = shapeIsSame + colorIsSame + numberIsSame + alphaIsSame;
+
+        return (isSame == 0) ? true : false;
     }
 
     protected boolean playIsPossible(){
-        // to be implemented
-        return true;  // temporary placeholder until implementation
+        boolean isPossible = false;
+        int length = mCardOnBoard.size();
+
+            for (int f = 0; f < length; f++) {
+                for (int s = 0; s < length; s++) {
+                    for (int t = 0; t < length; t++) {
+                        if(isTriple(f, s, t)){
+                            isPossible = true;
+                        }
+                    }
+                }
+            }
+        return isPossible;
     }
 
     protected String getGameOverMessage(Context context){

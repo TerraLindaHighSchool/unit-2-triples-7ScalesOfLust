@@ -22,7 +22,7 @@ public class Deck {
         for(int i = 0; i < mShuffledDeck.size(); i++){
             int random = (int)(Math.random()*mShuffledDeck.size());
             Card temp = mShuffledDeck.get(i);
-            mShuffledDeck.set(i, temp);
+            mShuffledDeck.set(i, mShuffledDeck.get(random));
             mShuffledDeck.set(random, temp);
         }
 
