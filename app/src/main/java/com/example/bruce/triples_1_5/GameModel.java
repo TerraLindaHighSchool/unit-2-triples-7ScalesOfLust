@@ -93,8 +93,8 @@ public class GameModel {
      * Scoring
      *************************************************/
     protected int updateScore() {
-        long time = (mStartTime - System.currentTimeMillis());
-        setScore(getScore() + ((int)time / 100));;
+        long time = (-1*(mStartTime - System.currentTimeMillis()));
+        setScore(getScore() + ((int)time / 10000000));
         return mScore;
     }
 
